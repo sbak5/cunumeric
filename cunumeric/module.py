@@ -1337,9 +1337,6 @@ def _concatenate(
 
     idx_arr.append(0)
 
-    for i in range(axis + 1, common_info.ndim):
-        idx_arr.append(slice(out_shape[i]))
-
     for inp in inputs:
         if inp.size > 0:
             idx_arr[axis] = slice(offset, offset + inp.shape[axis])
