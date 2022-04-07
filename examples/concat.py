@@ -38,9 +38,11 @@ def total_space(N, nnodes, ngpus, ft):
     return (N * N * nnodes * ngpus * 4) * np.dtype(ft).itemsize
 
 
-def run_block(N, I, nnodes, ngpus, ft):  # noqa: E741
+def run_block(N, niter, nnodes, ngpus, ft):
+    if niter < 30:
+        niter = 30
     print(f"Problem Size:     [[{str(N),str(N)}] * 2 ] * {nnodes} * {ngpus}")
-    print("Total Iterations: " + str(I))
+    print("Total Iterations: " + str(niter))
     space = total_space(N, nnodes, ngpus, ft)
     print(
         "Total Size:       "
@@ -56,7 +58,7 @@ def run_block(N, I, nnodes, ngpus, ft):  # noqa: E741
     sum_times = []
     total_times = []
 
-    for idx in range(I):
+    for idx in range(niter):
         start = time()
         # Run for as many iterations as was requested
         B = np.concatenate(A, axis=-1)
@@ -73,9 +75,9 @@ def run_block(N, I, nnodes, ngpus, ft):  # noqa: E741
         concat_times.append(concat_time)
         sum_times.append(sum_time)
         total_times.append(sum_time + concat_time)
-    concat_times = concat_times[2:]
-    sum_times = sum_times[2:]
-    total_times = total_times[2:]
+    concat_times = concat_times[20:]
+    sum_times = sum_times[20:]
+    total_times = total_times[20:]
 
     index_min = min(range(len(total_times)), key=total_times.__getitem__)
     index_max = max(range(len(total_times)), key=total_times.__getitem__)
@@ -91,7 +93,7 @@ def run_block(N, I, nnodes, ngpus, ft):  # noqa: E741
         f"{min(total_times)}, {max(total_times)}  ms\n"
     )
 
-    return (avg[0] + avg[1]) * I
+    return (avg[0] + avg[1]) * niter
 
 
 if __name__ == "__main__":
@@ -149,6 +151,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
+
     if args.P == 16:
         run_benchmark(
             run_block,
